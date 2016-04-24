@@ -1,6 +1,9 @@
 #include <iostream>
 #include <sstream>
 
+struct HeapData;
+class Heap;
+
 struct AVLData {
     std::string name;
     int heap_pos;
@@ -30,7 +33,7 @@ class AVL {
 public:
     AVL();
     ~AVL();
-    void insert(const AVLData &);
+    void insert(Heap &, HeapData &, const AVLData &);
     void change(const AVLData &);
     const AVLData& find(const AVLData &) const;
     std::string print() const;
@@ -38,6 +41,7 @@ public:
 
 struct HeapData {
     int priority;
+    int time;
     AVL::AVLnode* node;
     HeapData();
     ~HeapData();
@@ -52,17 +56,18 @@ class Heap {
     void sift_down(int);
     void sift_up(int);
     void extand();
+    static int time;
 public:
     Heap();
     ~Heap();
     HeapData get_max() const;
     void pop_max();
-    void add(const HeapData &);
-    void increase_priority(int, const HeapData &);
+    void add(HeapData &);
+    void increase_priority(int,HeapData &);
     bool empty() const;
     std::string print() const;
 };
-
+int Heap::time = 0;
 
 bool AVLData::operator==(const AVLData &data) const {
     return name == data.name;
@@ -89,6 +94,9 @@ HeapData::~HeapData() {
     priority = 0;
 }
 bool HeapData::operator<(const HeapData &d) const {
+    if (priority == d.priority) {
+        return time < d.time;
+    }
     return priority < d.priority;
 }
 
@@ -129,7 +137,7 @@ AVL::AVLnode* AVL::AVLnode::insert(AVLnode *node) {
     return balance();
 }
 
-void AVL::insert(const AVLData &data) {
+void AVL::insert(Heap &heap, HeapData &heap_data, const AVLData &data) {
     AVLnode *new_node = new AVLnode(data);
     if (root == NULL) {
         root = new_node;
@@ -137,6 +145,8 @@ void AVL::insert(const AVLData &data) {
     else {
         root = root->insert(new_node);
     }
+    heap_data.node = new_node;
+    heap.add(heap_data);
 }
 
 void AVL::AVLnode::print(std::string &output) const {
@@ -290,17 +300,24 @@ void Heap::pop_max() {
     --size;
     sift_down(1);
 }
-void Heap::add(const HeapData &d) {
+void Heap::add(HeapData &d) {
     if (size == capacity) {
         extand();
+    }
+    d.time = --time;
+    if (d.node != NULL) {
+        d.node->data.heap_pos = size;
     }
     data[size++] = d;
     sift_up(size - 1);
 }
-void Heap::increase_priority(int x, const HeapData &d) {
-    data[x].priority = d.priority;
+void Heap::increase_priority(int x, HeapData &d) {
+    d.time = 0;
+    if (data[x] < d) {
+        data[x].priority = d.priority;
+        data[x].time = --time;
+    }
     sift_up(x);
-    sift_down(x);
 }
 bool Heap::empty() const {
     return size == 1;
@@ -314,27 +331,40 @@ std::string Heap::print() const {
     }
     return out;
 }
-/*
-int main() {
-    Data data;
+
+
+//int main() {
+void main_function(std::istream &in, std::ostream &out) {
+    std::string name;
+    int val;
     AVL avl;
     Heap heap;
-    while (std::cin >> data) {
-        int a;
-        if (0 == (a = avl.find(data).val)) {
-            a = heap.add(data);
-            data.val = a;
-            avl.insert(data);
+    int m, n;
+    //std::cin >> m >> n;
+    in >> m >> n;
+    while (/*std::cin >> name >> val*/ in >> name >> val) {
+        AVLData avl_data;
+        avl_data.name = name;
+        avl_data.heap_pos = 0;
+        try {
+            HeapData heap_data;
+            heap_data.priority = val;
+            heap.increase_priority(avl.find(avl_data).heap_pos, heap_data);
         }
-        else {
-            a = heap.increase_priority(a, data);
-            data.val = a;
-            avl.change(data);
+        catch (int) {
+            HeapData heap_data;
+            heap_data.priority = val;
+            avl.insert(heap, heap_data, avl_data);
         }
     }
     while (!heap.empty()) {
-        std::cout << heap.get_max() << std::endl;
+        HeapData heap_data = heap.get_max();
         heap.pop_max();
+        //std::cout << heap_data.node->data.name << ' ' << heap_data.priority << std::endl;
+        out << heap_data.node->data.name << std::endl;
     }
 }
-*/
+
+int main() {
+    main_function(std::cin, std::cout);
+}

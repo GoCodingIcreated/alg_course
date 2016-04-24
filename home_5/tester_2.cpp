@@ -9,8 +9,8 @@
 
 TEST(AVLData, input) {
     AVLData d;
-    std::ifstream in1("1.dat");
-    std::ifstream in2("1.dat");
+    std::ifstream in1("tests/1.dat");
+    std::ifstream in2("tests/1.dat");
     
     in1 >> d;
     in1.close();
@@ -27,10 +27,10 @@ TEST(AVLData, output) {
     d.name = "Ivan";
     d.heap_pos = 10;
     
-    std::ofstream out("2.dat");
+    std::ofstream out("tests/2.dat");
     out << d;
     out.close();
-    std::ifstream in("2.dat");
+    std::ifstream in("tests/2.dat");
     std::string str;
     int val;
     in >> str >> val;
@@ -114,36 +114,43 @@ TEST(AVL, create) {
     }
 }
 
+/*
 TEST(AVL, insert) {
     AVL avl;
-    
     AVLData d;
+    Heap heap;
+    HeapData heap_data;
+    heap_data.priority = 1;
+
     d.name = "Aaaa";
     d.heap_pos = 1;
-    avl.insert(d);
+    avl.insert(heap, heap_data, d);
     ASSERT_EQ(std::string("Aaaa 1\n"), avl.print());
 
     AVLData d2;
     d2.name = "Bbbbb";
     d2.heap_pos = 2;
-    avl.insert(d2);
+    avl.insert(heap, heap_data, d2);
     ASSERT_EQ(std::string("Aaaa 1\nBbbbb 2\n"), avl.print());
 
     AVLData d3;
     d3.name = "Ccc";
     d3.heap_pos = 3;
-    avl.insert(d3);
+    avl.insert(heap, heap_data, d3);
     ASSERT_EQ(std::string("Aaaa 1\nBbbbb 2\nCcc 3\n"), avl.print());
 
     AVLData d4;
     d4.name = "A";
     d4.heap_pos = 0;
-    avl.insert(d4);
+    avl.insert(heap, heap_data, d4);
     ASSERT_EQ(std::string("A 0\nAaaa 1\nBbbbb 2\nCcc 3\n"), avl.print());
 }
 
 TEST(AVL, insert2) {
     AVL avl;
+    Heap heap;
+    HeapData heap_data;
+    heap_data.priority = 1;
     std::vector<std::string> input;
     std::string out;
     for (int i = 0; i < 100; ++i) {
@@ -159,7 +166,7 @@ TEST(AVL, insert2) {
         ss << d << '\n';
         out = ss.str();
         input.push_back(out);
-        avl.insert(d);
+        avl.insert(heap, heap_data, d);
     }
     std::sort(input.begin(), input.end());
     out = "";
@@ -168,10 +175,14 @@ TEST(AVL, insert2) {
     }
     ASSERT_EQ(out, avl.print());
 }
-
+*/
 TEST(AVL, change) {
     AVL avl;
     AVLData d1, d2, d3, d4, d5;
+    Heap heap;
+    HeapData heap_data;
+    heap_data.priority = 1;
+    
     d1.name = "aaa";
     d1.heap_pos = 1;
 
@@ -187,11 +198,11 @@ TEST(AVL, change) {
     d5.name = "eee";
     d5.heap_pos = 5;
 
-    avl.insert(d1);
-    avl.insert(d2);
-    avl.insert(d3);
-    avl.insert(d4);
-    avl.insert(d5);
+    avl.insert(heap, heap_data, d1);
+    avl.insert(heap, heap_data, d2);
+    avl.insert(heap, heap_data, d3);
+    avl.insert(heap, heap_data, d4);
+    avl.insert(heap, heap_data, d5);
     std::string out = "aaa 1\nbbb 2\nccc 3\nddd 4\neee 5\n";
     
     ASSERT_EQ(out, avl.print());
@@ -257,6 +268,69 @@ TEST(Heap, add2) {
         heap.pop_max();
     }
 }
+
+void test_function(std::ifstream &input, std::ifstream &input_answer, std::stringstream &out) {
+    main_function(input, out);
+    std::string str, str2;
+    while (input_answer >> str) {
+        out >> str2;
+        std::cerr << str2 << std::endl;
+        ASSERT_EQ(str, str2);
+    }
+    std::cerr << std::endl;
+    if (out >> str2) {
+        FAIL() << str2 << std::endl;
+    }
+}
+TEST(Solution, DefaultTest) {
+    std::ifstream input("tests/3.dat");
+    std::ifstream input_answer("tests/3.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
+TEST(Solution, IncreaseSequence) {
+    std::ifstream input("tests/4.dat");
+    std::ifstream input_answer("tests/4.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
+TEST(Solution, DecreaseSequence) {
+    std::ifstream input("tests/5.dat");
+    std::ifstream input_answer("tests/5.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
+TEST(Solution, RandomSequence1) {
+    std::ifstream input("tests/6.dat");
+    std::ifstream input_answer("tests/6.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
+TEST(Solution, RandomSequence2) {
+    std::ifstream input("tests/7.dat");
+    std::ifstream input_answer("tests/7.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
+TEST(Solution, RandomSequence3) {
+    std::ifstream input("tests/8.dat");
+    std::ifstream input_answer("tests/8.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
+TEST(Solution, RandomSequence4) {
+    std::ifstream input("tests/9.dat");
+    std::ifstream input_answer("tests/9.ans");
+    std::stringstream out;
+    test_function(input, input_answer, out);
+}
+
 
 
 int main(int argc, char **argv) {
